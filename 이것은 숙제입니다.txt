@@ -1,0 +1,303 @@
+package PHS.exam4;
+
+import java.awt.Color;
+import java.awt.Dimension;
+import java.awt.Graphics;
+import java.awt.Image;
+import java.awt.event.KeyEvent;
+import java.awt.event.KeyListener;
+
+import javax.swing.ImageIcon;
+import javax.swing.JFrame;
+import javax.swing.JLabel;
+import javax.swing.JPanel;
+
+class TargetThread extends Thread {
+	JLabel target;
+	JLabel bullet;
+	static int n;
+	int stage = 5;
+	TargetThread(JLabel target,JLabel bullet,int n){
+		this.n = n;
+		this.target=target;
+		target.setLocation(0,0);
+	}
+	/* public void update(int x, int y) {
+	 * if(x>0 && x<450){
+	 * x=target.getX()+5;
+	 * y=target.getY();
+	 * target.setLocation(x,y);
+	 * }
+	 * }  */
+	
+	/* public void update2(int x, int y) {
+	 * while(true) {
+	 * if(x>0){
+	 * x=target.getX()-5;
+	 * y=target.getY();
+	 * target.setLocation(x,y)
+	 * }
+	 * try {
+	 * sleep(20);
+	 * }
+	 * catch(Exception e){
+	 * target.setLocation(0,0);
+	 * }
+	 * if(x==0) break;
+	 * }
+	 * } 
+	 * */
+	public void run() {
+		while(true) {
+			int x=target.getX();
+			int y=target.getY();
+			if(x<450) {
+				x=target.getX()+n;
+				y=target.getY();
+				target.setLocation(x,y);
+			}
+			else if(x>0)
+				while(true) {
+					if(x >= 0) {
+						x=target.getX() -n;
+						y=target.getY();
+						target.setLocation(x,y);
+					}
+					try {
+						sleep(20);
+					}
+					catch(Exception e) {
+						target.setLocation(0,0);
+					}
+					if(x <= 0) break;
+				}
+			try {
+				sleep(20);
+			}
+			catch(Exception e) {
+				target.setLocation(0,0);
+			}
+		}
+	}
+}
+class bulletThread3 extends Thread { //타겟에서 자동으로 내려오는 스레드
+	ImageIcon img4 = new ImageIcon("뱅기2.jpg");
+	Image omg = img4.getImage(); //이미지아이콘 맞추는 과정
+	Image changedImg = omg.getScaledInstance(100, 80, Image.SCALE_SMOOTH);
+	ImageIcon img = new ImageIcon(changedImg);
+	JLabel player;
+	JLabel bullet;
+	JLabel bullet2;
+	JLabel target;
+	ImageIcon img2;
+	ImageIcon img1;
+	int stage = 5; //스테이지 변수 증가하면 속도를 증가 시키기 위해 선언
+	bulletThread3(JLabel bullet, JLabel player, JLabel target) {
+		this.bullet2 = bullet;
+		this.player = player;
+		this.target = target;
+		bullet2.setLocation(0,0); }
+	public void run() {
+		while(true) {
+			bullet2.setBounds(target.getX(), target.getY(), 50, 50);
+			//타겟에서 내려오는 폭탄을 반복으로 계속 생성
+			while(true) { // 타겟폭탄의 좌표 이동을 반복해줄 반복문
+				
+				int i = bullet2.getX();
+				int j = bullet2.getY()+10; //
+				try {
+					sleep(10);
+				}
+				catch(Exception e) {
+					bullet2.setLocation(0,0);
+				}
+				if(j==800) break; //폭탄이 일정 구간 떨어지면 break;
+			}
+		}
+	}
+}
+class bulletThread2 extends Thread {
+	ImageIcon img4 = new ImageIcon("뱅기2.jpg");
+	Image omg = img4.getImage();
+	Image changedImg = omg.getScaledInstance(100, 80, Image.SCALE_SMOOTH);
+	ImageIcon img = new ImageIcon(changedImg);
+	JLabel bullet;
+	JLabel bullet2;
+	JLabel target;
+	JLabel pan;
+	JLabel player;
+	static int jum;
+	ImageIcon img2;
+	ImageIcon img1;
+	int stage = 5;
+	int stage1 = 1;
+	bulletThread2(JLabel bullet, JLabel target, JLabel pan, ImageIcon img2, ImageIcon img1, 
+			JLabel bullt2, JLabel player) {
+		this.bullet=bullet;
+		this.bullet2=bullet2;
+		this.target = target;
+		this.player = player;
+		bullet.setLocation(0,0);
+		this.pan = pan;
+		this.img2 = img2;
+		this.img1 = img1;
+	}
+	public void run() {
+		while(true) {
+			int x = bullet.getX();
+			int y = bullet.getY() -10;
+			int i = bullet2.getX();
+			int j = bullet2.getY() +10;
+			if( x>500 ) {
+				bullet.setLocation(0,0);
+				bullet2.setLocation(0,0);
+			}
+			else {
+				bullet.setLocation(x,y);
+				bullet2.setLocation(i,j);
+			}
+			try {
+				sleep(10);
+			}
+			catch(Exception e) {
+				bullet.setLocation(0,0);
+				bullet2.setLocation(0,0);
+			}
+			if(((target.getX() <=x) &&(x<target.getX()+target.getWidth()))
+					&&((target.getY() <=y) && (y<target.getY()+target.getHeight()))
+					/* ||((target.getX() <=i)&&(i<target.getX()+target.getWidth()))
+					 * &&((target.getY()<=j)&&(j<target.getY()+target.getHeight()))
+					 */
+					) {
+				jum += 5; //맞추면 점수가 증가함
+				target.setIcon(img2); //타겟이 맞으면 폭탄 이미지로 바뀜
+				TargetThread.interrupted();
+				try {
+					sleep(300);
+					target.setIcon(img1); //타겟이 일정시간 지난후 다시 원래이미지로 변경
+				}
+				catch(Exception e) {
+					bullet.setLocation(0,0);
+				}
+				if(jum>stage) { //stage점수보다 높아지면 스테이지를 더하고 속도를 높임
+					stage1 += 1;
+					TargetThread.n += 5;
+					stage += 10;
+				}
+				pan.setText(stage1+ "탄 점수 :" +jum+ "점");
+			}
+			if(((player.getX()-50<=i)&&(i<player.getX()+player.getWidth()))
+					&&((player.getY()<=j)&&(j<player.getY()+player.getHeight()))
+		){ //플레이어의 공간에 폭탄이 떨어짐 범위 설정
+			player.setIcon(img2); //플레이어가 맞아도 이미지 변경
+			try {
+			sleep(300);
+					player.setIcon(img);
+		}
+		catch(Exception e) {
+		bullet.setLocation(0,0);
+		}
+	}
+}
+}
+}
+
+
+public class shoot1945 extends JFrame {
+	public shoot1945() {
+		ImageIcon icon = new ImageIcon("배경.png");
+		JPanel p = new JPanel() {
+			public void paintComponent(Graphics g) {
+				Dimension d = getSize();
+				g.drawImage(icon.getImage(),0,0, d.width, d.height, null);
+			}
+		};
+		int jum =0;
+		int n = 5;
+		p.setBackground(Color.pink);
+		setTitle("shooting");
+		setSize(500,800);
+		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+		ImageIcon img = new ImageIcon("뱅기2.png");
+		Image omg = img.getImage();
+		Image changedImg = omg.getScaledInstance(100, 80, Image.SCALE_SMOOTH );
+		ImageIcon img4 = new ImageIcon(changedImg);
+		JLabel player = new JLabel(img4);
+		
+		ImageIcon img1 = new ImageIcon("보노보노2.png");
+		Image omg1 = img1.getImage();
+		Image changedImg1 = omg1.getScaledInstance(65, 65, Image.SCALE_SMOOTH );
+		ImageIcon bono = new ImageIcon(changedImg1);
+		ImageIcon img2 = new ImageIcon("car3.gif");
+		ImageIcon goong = new ImageIcon("돼지.png");
+		ImageIcon img3 = new ImageIcon("boom2.jpg");
+		
+		JLabel target = new JLabel(bono);
+		target.setBounds(0,0,50,50);
+		JLabel bullet = new JLabel(img2);
+		JLabel bullet2 = new JLabel(goong);
+		
+		TargetThread t = new TargetThread(target,bullet,n);
+		t.start();
+		add(target);
+		
+		JLabel pan = new JLabel("보노보노 ");
+		pan.setForeground(Color.white);
+		bullet.setBounds(200,700,10,10);
+		bulletThread2 t2 = new
+				bulletThread2(bullet, target, pan, img3, bono, bullet2, player);
+		//총알 스레드에 총알, 타겟, 라벨, 플레이어, 이미지들을 보내어 사용
+		bulletThread3 t3 = new bulletThread3(bullet2, player, target);
+		//폭탄 스레드에 필요한 값들 입력
+		t2.start();
+		t3.start();
+		add(bullet);
+		add(bullet2);
+		p.add(pan);
+		player.setLayout(null);
+		player.setBounds(200,700,60,60);
+		add(player);
+		addKeyListener(new KeyListener() {
+			@Override
+			public void keyTyped(KeyEvent e) {
+		}
+			@Override
+			public void keyReleased(KeyEvent e) {
+	}
+			@Override
+			public void keyPressed(KeyEvent e) {
+				//키눌렀을때 설정(폭탄이 혹시 멈추면 z눌러 재실행)
+				int keycode = e.getKeyCode();
+				switch(keycode) {
+				case KeyEvent.VK_DOWN: player.setBounds(player.getX(),
+						player.getY()+10, 60, 60);
+				break;
+				case KeyEvent.VK_UP: player.setBounds(player.getX(),player.getY()-10, 60, 60);
+				break;
+				case KeyEvent.VK_RIGHT: player.setBounds(player.getX()+10,
+						player.getY(),60, 60);
+				break;
+				case KeyEvent.VK_LEFT: player.setBounds(player.getX()-10, player.getY(),
+						60,60);
+				break;
+				case KeyEvent.VK_SPACE : bullet.setBounds(player.getX()+25,player.getY(),
+						10,10);
+				break;
+				case KeyEvent.VK_Z : bullet2.setBounds(target.getX()+25, target.getY(),
+						50,50);
+				break; //폭탄 멈췄을시 재시행 가능 버튼
+				}
+				repaint();
+			}
+		});
+		add(p);
+		setVisible(true);
+		this.requestFocus();
+		setFocusable(true);
+	}
+	public static void main(String[] args) {
+		new shoot1945();	
+				}
+			}
+
+
